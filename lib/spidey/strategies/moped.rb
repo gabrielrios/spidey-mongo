@@ -46,7 +46,7 @@ module Spidey::Strategies
 
     def add_error(attrs)
       error = attrs.delete(:error)
-      doc = attrs.merge(created_at: Time.now, error: error.class.name, message: error.message, spider: self.class.name)
+      doc = attrs.merge(created_at: Time.now, error: error.class.name, message: error.message, spider: self.class.name, backtrace: error.backtrace)
       error_collection.insert doc
       Spidey.logger.error "Error on #{attrs[:url]}. #{error.class}: #{error.message}"
     end
