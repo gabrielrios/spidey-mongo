@@ -1,11 +1,12 @@
 module Spidey::Strategies
   module Moped
-    attr_accessor :url_collection, :result_collection, :error_collection
+    attr_accessor :url_collection, :result_collection, :error_collection, :skip_crawled
 
     def initialize(attrs = {})
       self.url_collection = attrs.delete(:url_collection)
       self.result_collection = attrs.delete(:result_collection)
       self.error_collection = attrs.delete(:error_collection)
+      self.skip_crawled = attrs.delete(:skip_crawled) || false
       super attrs
     end
 
@@ -36,6 +37,7 @@ module Spidey::Strategies
 
     def each_url(&block)
       while url = get_next_url
+        break if self.skip_crawled && url['last_crawled_at']
         break if url['last_crawled_at'] && url['last_crawled_at'] >= @crawl_started_at  # crawled already in this batch
         url_collection.find({'_id' => url['_id']}).update('$set' => {last_crawled_at: Time.now})
         yield url['url'], url['handler'], url['default_data'].symbolize_keys
